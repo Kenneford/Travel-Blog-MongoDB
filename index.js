@@ -18,6 +18,7 @@ const {
   createBlog,
   getUsersBlogs,
   getBlogByID,
+  updateBlog,
   deleteBlog,
 } = require("./usersController/userBlogs");
 
@@ -69,30 +70,28 @@ app.post("/api/login", async (req, res) => {
   res.send(result);
 });
 
-app.get("/api/log-out", async (req, res) => {
+app.get("/api/log-out", authenticateToken, async (req, res) => {
   const result = await logOutUser(req.body);
   console.log(result);
-  if (result) {
-    return result;
-  } else {
-    res.json({ result: "ERROR", message: "User is not logged in." });
+  if (!result) {
+    return res.send("Error logging out!");
   }
+  res.json({ Status: "You successfully logged out" });
 });
 
 //Posting a Blog By a Validated User
 app.post("/api/blog", async (req, res) => {
   console.log(req.body);
   const result = await validateUser(req.body);
-  if (!result) {
+  if (result) {
     return res.send("Not Authorized!");
   }
   const usersBlog = await createBlog(req.body);
-  res
-    .cookie("access_token", result, {
-      httpOnly: true,
-      secure: false,
-    })
-    .render("/blog", { usersBlog });
+  res.cookie("access_token", result, {
+    httpOnly: true,
+    secure: false,
+  });
+  res.json({ Status: "Your blog is posted successfully!" });
 });
 
 //Getting All Blogs
@@ -110,7 +109,15 @@ app.get("/api/blog/:id", (req, res) => {
     .catch((err) => sendErrorOutput(err, res));
 });
 
-app.delete("/api/blog/:id", (req, res) => {
+app.patch("/api/blog/:id", (req, res) => {
+  const { id } = req.params;
+  updateBlog(id)
+    .then((data) => {
+      res.json({ Status: "Blog successfully updated!" });
+    })
+    .catch((err) => sendErrorOutput(err, res));
+});
+app.delete("/api/blog/:id", authenticateToken, (req, res) => {
   const { id } = req.params;
   deleteBlog(id)
     .then((data) => {

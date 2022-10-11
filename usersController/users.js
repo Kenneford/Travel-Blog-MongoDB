@@ -64,20 +64,20 @@ const validateUser = async ({ username, password }) => {
   }
   return { token: generateAccessToken(username), username };
 };
-const logOutUser = async ({ username, password }) => {
-  const user = await VerifiedUser.findOne({ username });
-  console.log(user);
-  let isValid = false;
+
+const logOutUser = async (req, res) => {
   try {
-    isValid = await bcrypt.compare(password, user.passwordHash);
+    await validateUser.logOut();
+    // To verify that current user is now empty, currentAsync can be used
+    const currentUser = await validateUser.current();
+    if (!currentUser) {
+      res.send("Success! No user is logged in anymore!");
+    }
+    VerifiedUser();
+    return true;
   } catch (error) {
-    return null;
+    return false;
   }
-  if (!isValid) {
-    return null;
-  }
-  return null;
-  // return { token: generateAccessToken(username), username };
 };
 
 //Check validity of a User's Identity

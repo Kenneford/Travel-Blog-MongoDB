@@ -52,8 +52,12 @@ async function getBlogByID(id) {
   const userBlog = await VerifiedUsersBlog.findById(id);
   return userBlog;
 }
+// const updateBlog = async (id) => {
+//   const blogUpdate = await VerifiedUsersBlog.findByIdAndUpdate(id);
+//   return blogUpdate;
+// };
 const deleteBlog = async (id) => {
-  const blogID = await VerifiedUsersBlog.deleteOne(id);
+  const blogID = await VerifiedUsersBlog.findByIdAndDelete(id);
   return blogID;
 };
 
@@ -62,5 +66,6 @@ module.exports = {
   getUsersBlogs,
   getUserById,
   getBlogByID,
+  // updateBlog,
   deleteBlog,
 };
