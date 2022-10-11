@@ -11,6 +11,7 @@ const {
   getRegUsers,
   validateUser,
   authenticateToken,
+  authUserRole,
   logOutUser,
 } = require("./usersController/users");
 const {
@@ -21,6 +22,7 @@ const {
   updateBlog,
   deleteBlog,
 } = require("./usersController/userBlogs");
+const { VerifiedUser } = require("./model/verifiedUsers");
 
 const { authRole } = require("./permissions/authUserRoles");
 
@@ -126,6 +128,14 @@ app.delete("/api/blog/:id", authenticateToken, (req, res) => {
     .catch((err) => sendErrorOutput(err, res));
 });
 
+// app.get(
+//   "/api/managecountry",
+//   authenticateToken,
+//   authUserRole(),
+//   async (req, res) => {
+//     res.send();
+//   }
+// );
 // app.get(
 //   "/api/managecountry",
 //   authenticateToken,

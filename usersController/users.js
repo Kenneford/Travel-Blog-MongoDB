@@ -102,16 +102,22 @@ function authenticateToken(req, res, next) {
   });
 }
 
-const authUserRole = async (role) => {
-  const userRole = await VerifiedUser.findOne({ userRole: role });
-  return userRole;
-};
+// const authUserRole = async () => {
+//   const role = await VerifiedUser.findOne({ userRole: "admin" });
+//   return (req, res, next) => {
+//     if (!role) {
+//       res.status(401);
+//       return res.send("Not Permitted!");
+//     }
+//     next();
+//   };
+// };
 
 module.exports = {
   userSignup,
   getRegUsers,
   validateUser,
   authenticateToken,
-  authUserRole,
+  // authUserRole,
   logOutUser,
 };
