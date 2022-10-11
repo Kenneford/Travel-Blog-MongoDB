@@ -14,11 +14,11 @@ const {
   logOutUser,
 } = require("./usersController/users");
 const {
+  getUserById,
   createBlog,
-  getUserByBlog,
   getUsersBlogs,
   getBlogByID,
-  deleteBlogByID,
+  deleteBlog,
 } = require("./usersController/userBlogs");
 
 const { authRole } = require("./permissions/authUserRoles");
@@ -49,6 +49,14 @@ app.post("/api/signup", (req, res) => {
 app.get("/api/signedup-users", async (req, res) => {
   res.send(await getRegUsers());
 });
+app.get("/api/signedup-user/:id", async (req, res) => {
+  const { id } = req.params;
+  getUserById(id)
+    .then((data) => {
+      res.json(data);
+    })
+    .catch((err) => sendErrorOutput(err, res));
+});
 
 //Signing In a User
 app.post("/api/login", async (req, res) => {
@@ -60,6 +68,7 @@ app.post("/api/login", async (req, res) => {
   }
   res.send(result);
 });
+
 app.get("/api/log-out", async (req, res) => {
   const result = await logOutUser(req.body);
   console.log(result);
@@ -77,7 +86,7 @@ app.post("/api/blog", async (req, res) => {
   if (!result) {
     return res.send("Not Authorized!");
   }
-  const usersBlog = await g();
+  const usersBlog = await createBlog(req.body);
   res
     .cookie("access_token", result, {
       httpOnly: true,
@@ -86,26 +95,12 @@ app.post("/api/blog", async (req, res) => {
     .render("/blog", { usersBlog });
 });
 
-// app.post("/blog", async (req, res) => {
-//   console.log(req.body);
-//   const result = await validateUser(req.body);
-//   if (!result) {
-//     return res.redirect("/sign-in");
-//   }
-//   const users = await getUsersBlogs();
-//   res
-//     .cookie("access_token", result, {
-//       httpOnly: true,
-//       secure: false,
-//     })
-//     .render("/blog", { users });
-// });
-
 //Getting All Blogs
-app.get("/api/blog", authenticateToken, async (req, res) => {
+app.get("/api/blog", async (req, res) => {
   res.send(await getUsersBlogs());
 });
 
+//Getting a Blog By ID
 app.get("/api/blog/:id", (req, res) => {
   const { id } = req.params;
   getBlogByID(id)
@@ -115,9 +110,9 @@ app.get("/api/blog/:id", (req, res) => {
     .catch((err) => sendErrorOutput(err, res));
 });
 
-app.delete("/api/blog/:id", authenticateToken, (req, res) => {
+app.delete("/api/blog/:id", (req, res) => {
   const { id } = req.params;
-  deleteBlogByID(id)
+  deleteBlog(id)
     .then((data) => {
       res.json({ Status: "Blog successfully deleted!" });
     })
