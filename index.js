@@ -22,7 +22,7 @@ const {
   updateBlog,
   deleteBlog,
 } = require("./usersController/userBlogs");
-const { VerifiedUser } = require("./model/verifiedUsers");
+const VerifiedUsersBlog = require("./model/verifiedUsersBlog");
 
 const { authRole } = require("./permissions/authUserRoles");
 
@@ -111,14 +111,63 @@ app.get("/api/blog/:id", (req, res) => {
     .catch((err) => sendErrorOutput(err, res));
 });
 
-app.patch("/api/blog/:id", (req, res) => {
+// app.patch("/api/blog/:id", (req, res) => {
+//   const { id } = req.params;
+//   updateBlog(id)
+//     .then((data) => {
+//       res.json({ Status: "Blog successfully updated!" });
+//     })
+//     .catch((err) => sendErrorOutput(err, res));
+// });
+
+//Patching/Updating One
+app.patch("api/blog/:id", async (req, res) => {
   const { id } = req.params;
-  updateBlog(id)
-    .then((data) => {
-      res.json({ Status: "Blog successfully updated!" });
-    })
-    .catch((err) => sendErrorOutput(err, res));
+  const updateBlog = await VerifiedUsersBlog.updateOne(
+    { _id: id },
+    {
+      set: {
+        userName: req.body.userName,
+        title: req.body.title,
+        richText: req.body.richText,
+      },
+    }
+  );
+  res.send(updateBlog);
 });
+//Patching/Updating Many
+app.patch("api/blog/:id", async (req, res) => {
+  const { id } = req.params;
+  const criteria = req.query;
+  const updateBlog = await VerifiedUsersBlog.updateMany(
+    { criteria },
+    {
+      set: {
+        userName: req.body.userName,
+        title: req.body.title,
+        richText: req.body.richText,
+      },
+    }
+  );
+  res.send(updateBlog);
+});
+
+//Updating via PUT method by ID
+app.put("api/blog/:id", async (req, res) => {
+  const { id } = req.params;
+  const updateBlog = await VerifiedUsersBlog.updateOne(
+    { _id: id },
+    {
+      set: {
+        userName: req.body.userName || "",
+        title: req.body.title || "",
+        richText: req.body.richText || "",
+      },
+    }
+  );
+  res.send(updateBlog);
+});
+
 app.delete("/api/blog/:id", authenticateToken, (req, res) => {
   const { id } = req.params;
   deleteBlog(id)
