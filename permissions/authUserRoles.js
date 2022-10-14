@@ -1,10 +1,10 @@
 const VerifiedUser = require("../model/verifiedUsers");
 
 //Checks the Role of a User
-const authRole = (role) => {
-  const autUserRole = VerifiedUser.findOne({ userRole: role });
+const authRole = () => {
+  const autUserRole = VerifiedUser.findOne({ userRole: "admin" });
   return (req, res, next) => {
-    if (req.user.role !== autUserRole) {
+    if (req.VerifiedUser.userRole !== autUserRole) {
       res.status(401);
       return res.send("Not Authorized");
     }

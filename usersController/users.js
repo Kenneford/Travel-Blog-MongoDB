@@ -11,6 +11,10 @@ const VerifiedUser = require("../model/verifiedUsers");
 const db = mongoose.connection;
 db.on("error", console.error.bind(console, "MongoDB connection failed"));
 
+const _getUserByUsername = (userName) => {
+  return getRegUsers((u) => u.userName === userName);
+};
+
 const userSignup = ({
   firstName,
   lastName,
@@ -27,6 +31,10 @@ const userSignup = ({
   const confirmPasswordHash = bcrypt.hashSync(confirmPassword, 10);
   console.log("username", userName);
   console.log("password", password);
+
+  if (_getUserByUsername(userName)) {
+    throw new Error("User allready exists. Username " + userName);
+  }
   VerifiedUser.create({
     firstName,
     lastName,
@@ -102,6 +110,11 @@ function authenticateToken(req, res, next) {
   });
 }
 
+function adminCheck() {
+  const isAdmin = VerifiedUser.find({ userRole: "admin" });
+  return isAdmin;
+}
+
 // const authUserRole = async () => {
 //   const role = await VerifiedUser.findOne({ userRole: "admin" });
 //   return (req, res, next) => {
@@ -112,12 +125,24 @@ function authenticateToken(req, res, next) {
 //     next();
 //   };
 // };
+function authRole(userRole) {
+  const user = getRegUsers((u) => u.userRole === admin);
+  return (req, res, next) => {
+    if (req.userRole === user) {
+      res.status(401);
+      return res.send("Not Authorized");
+      // return basicUser;
+    }
+    next();
+  };
+}
 
 module.exports = {
   userSignup,
   getRegUsers,
   validateUser,
   authenticateToken,
-  // authUserRole,
+  authRole,
   logOutUser,
+  adminCheck,
 };
