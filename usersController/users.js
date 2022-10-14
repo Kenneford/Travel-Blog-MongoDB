@@ -27,7 +27,7 @@ const userSignup = ({
   const confirmPasswordHash = bcrypt.hashSync(confirmPassword, 10);
   console.log("username", userName);
   console.log("password", password);
-  VerifiedUser.create({
+  const newUser = VerifiedUser.create({
     firstName,
     lastName,
     userName,
@@ -50,8 +50,8 @@ function generateAccessToken(username) {
 }
 
 //How Users Should LogIn
-const validateUser = async ({ username, password }) => {
-  const user = await VerifiedUser.findOne({ username });
+const validateUser = async ({ userName, password }) => {
+  const user = await VerifiedUser.findOne({ userName });
   console.log(user);
   let isValid = false;
   try {
@@ -62,7 +62,7 @@ const validateUser = async ({ username, password }) => {
   if (!isValid) {
     return null;
   }
-  return { token: generateAccessToken(username), username };
+  return { token: generateAccessToken(userName), userName };
 };
 
 const logOutUser = async (req, res) => {
