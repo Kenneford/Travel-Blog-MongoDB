@@ -8,11 +8,11 @@ const userBlogSchema = new Schema(
     title: String,
     richText: String,
     blogImage: String,
-    //   created: { type: Date, default: Date.now },
-  },
-  {
-    timestamps: true,
+    created: { type: Date, default: Date.now },
   }
+  // {
+  //   timestamps: true,
+  // }
 );
 
 module.exports = mongoose.model("VerifiedUsersBlog", userBlogSchema);
