@@ -27,7 +27,7 @@ const userSignup = ({
   const confirmPasswordHash = bcrypt.hashSync(confirmPassword, 10);
   console.log("username", userName);
   console.log("password", password);
-  VerifiedUser.create({
+  const newUser = VerifiedUser.create({
     firstName,
     lastName,
     userName,
@@ -50,8 +50,8 @@ function generateAccessToken(username) {
 }
 
 //How Users Should LogIn
-const validateUser = async ({ username, password }) => {
-  const user = await VerifiedUser.findOne({ username });
+const validateUser = async ({ userName, password }) => {
+  const user = await VerifiedUser.findOne({ userName });
   console.log(user);
   let isValid = false;
   try {
@@ -62,23 +62,51 @@ const validateUser = async ({ username, password }) => {
   if (!isValid) {
     return null;
   }
-  return { token: generateAccessToken(username), username };
+  return { token: generateAccessToken(userName), userName };
 };
 
-const logOutUser = async (req, res) => {
-  try {
-    await validateUser.logOut();
-    // To verify that current user is now empty, currentAsync can be used
-    const currentUser = await validateUser.current();
-    if (!currentUser) {
-      res.send("Success! No user is logged in anymore!");
-    }
-    VerifiedUser();
-    return true;
-  } catch (error) {
-    return false;
-  }
-};
+// async function userLogin(userName, password, res) {
+//   const user = await VerifiedUser.findOne({ userName }).lean();
+
+//   if (!user) {
+//     return res.status(401).send({ status: "error", error: "Invalid username" }); // 401 MEANS UNAUTHORIZED
+//   }
+//   const match = await bcrypt.compare(password, user.passwordHash);
+//   if (match) {
+//     const roles = Object.values(user.userRoles).filter(Boolean);
+//     console.log(roles, "inside login");
+//     const token = jwt.sign(
+//       { id: user._id, userName: user.userName, roles: roles },
+//       JWT_SECRET,
+//       { expiresIn: "10m" }
+//     );
+
+//     const refreshToken = jwt.sign(
+//       { id: user._id, userName: user.userName },
+//       JWT_SECRET,
+//       { expiresIn: "1d" }
+//     );
+//     await VerifiedUser.findOneAndUpdate(
+//       { userName },
+//       { refreshToken: refreshToken }
+//     );
+//     res.cookie("jwt", refreshToken, {
+//       httpOnly: true,
+//       sameSite: "None",
+//       secure: true,
+//       maxAge: 24 * 60 * 60 * 1000,
+//     });
+
+//     res.json({
+//       status: "ok",
+//       accessToken: token,
+//       refreshToken: refreshToken,
+//       roles: [user.userRoles],
+//     });
+//   } else {
+//     res.sendStatus(401);
+//   }
+// }
 
 //Check validity of a User's Identity
 function authenticateToken(req, res, next) {
@@ -103,7 +131,7 @@ function authenticateToken(req, res, next) {
 }
 
 // const authUserRole = async () => {
-//   const role = await VerifiedUser.findOne({ userRole: "admin" });
+//   const role = await VerifiedUser.find({ userRole: "admin" });
 //   return (req, res, next) => {
 //     if (!role) {
 //       res.status(401);
@@ -115,9 +143,9 @@ function authenticateToken(req, res, next) {
 
 module.exports = {
   userSignup,
+  // userLogin,
   getRegUsers,
   validateUser,
   authenticateToken,
   // authUserRole,
-  logOutUser,
 };
