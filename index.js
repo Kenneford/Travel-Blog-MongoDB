@@ -10,9 +10,9 @@ const {
   userSignup,
   getRegUsers,
   validateUser,
-  // userLogin,
   authenticateToken,
-  // authUserRole,
+  authUserRole,
+  logOutUser,
 } = require("./usersController/users");
 const {
   getUserById,
@@ -72,7 +72,7 @@ app.post("/api/login", async (req, res) => {
   res.send(result);
 });
 
-app.get("/api/log-out", async (req, res) => {
+app.get("/api/log-out", authenticateToken, async (req, res) => {
   const result = await logOutUser(req.body);
   console.log(result);
   if (!result) {
@@ -93,7 +93,7 @@ app.post("/api/blog", async (req, res) => {
     httpOnly: true,
     secure: false,
   });
-  res.json({ Status: "Your blog is posted successfully!" }).send(usersBlog);
+  res.json({ Status: "Your blog is posted successfully!" });
 });
 
 app.get("/api/admins", async (req, res) => {
@@ -103,8 +103,8 @@ app.get("/api/admins", async (req, res) => {
 //Getting All Blogs
 app.get(
   "/api/blog",
-  // authenticateToken,
-  // authRole(adminCheck()),
+  authenticateToken,
+  authRole(adminCheck()),
   async (req, res) => {
     res.send(await getUsersBlogs());
   }
@@ -178,7 +178,7 @@ app.patch("api/blog/:id", async (req, res) => {
 //   res.send(updateBlog);
 // });
 
-app.delete("/api/blog/:id", (req, res) => {
+app.delete("/api/blog/:id", authenticateToken, (req, res) => {
   const { id } = req.params;
   deleteBlog(id)
     .then((data) => {

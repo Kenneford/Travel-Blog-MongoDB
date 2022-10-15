@@ -65,48 +65,20 @@ const validateUser = async ({ userName, password }) => {
   return { token: generateAccessToken(userName), userName };
 };
 
-// async function userLogin(userName, password, res) {
-//   const user = await VerifiedUser.findOne({ userName }).lean();
-
-//   if (!user) {
-//     return res.status(401).send({ status: "error", error: "Invalid username" }); // 401 MEANS UNAUTHORIZED
-//   }
-//   const match = await bcrypt.compare(password, user.passwordHash);
-//   if (match) {
-//     const roles = Object.values(user.userRoles).filter(Boolean);
-//     console.log(roles, "inside login");
-//     const token = jwt.sign(
-//       { id: user._id, userName: user.userName, roles: roles },
-//       JWT_SECRET,
-//       { expiresIn: "10m" }
-//     );
-
-//     const refreshToken = jwt.sign(
-//       { id: user._id, userName: user.userName },
-//       JWT_SECRET,
-//       { expiresIn: "1d" }
-//     );
-//     await VerifiedUser.findOneAndUpdate(
-//       { userName },
-//       { refreshToken: refreshToken }
-//     );
-//     res.cookie("jwt", refreshToken, {
-//       httpOnly: true,
-//       sameSite: "None",
-//       secure: true,
-//       maxAge: 24 * 60 * 60 * 1000,
-//     });
-
-//     res.json({
-//       status: "ok",
-//       accessToken: token,
-//       refreshToken: refreshToken,
-//       roles: [user.userRoles],
-//     });
-//   } else {
-//     res.sendStatus(401);
-//   }
-// }
+const logOutUser = async (req, res) => {
+  try {
+    await validateUser.logOut();
+    // To verify that current user is now empty, currentAsync can be used
+    const currentUser = await validateUser.current();
+    if (!currentUser) {
+      res.send("Success! No user is logged in anymore!");
+    }
+    VerifiedUser();
+    return true;
+  } catch (error) {
+    return false;
+  }
+};
 
 //Check validity of a User's Identity
 function authenticateToken(req, res, next) {
@@ -131,7 +103,7 @@ function authenticateToken(req, res, next) {
 }
 
 // const authUserRole = async () => {
-//   const role = await VerifiedUser.find({ userRole: "admin" });
+//   const role = await VerifiedUser.findOne({ userRole: "admin" });
 //   return (req, res, next) => {
 //     if (!role) {
 //       res.status(401);
@@ -143,9 +115,9 @@ function authenticateToken(req, res, next) {
 
 module.exports = {
   userSignup,
-  // userLogin,
   getRegUsers,
   validateUser,
   authenticateToken,
   // authUserRole,
+  logOutUser,
 };
